@@ -10,6 +10,8 @@ class AppRoutes {
   static const String home = '/home';
   static const String lists = '/lists';
   static const String listDetail = '/list-detail';
+  static const String history = '/history';
+  static const String purchaseDetail = '/purchase-detail';
   static const String profile = '/profile';
   static const String categories = '/categories';
   static const String notifications = '/notifications';

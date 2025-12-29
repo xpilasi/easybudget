@@ -45,6 +45,8 @@ class AppConstants {
   static const String keyUserData = 'user_data';
   static const String keyCategories = 'categories';
   static const String keyLists = 'shopping_lists';
+  static const String keyCompletedPurchases = 'completed_purchases';
+  static const String keyPriceHistory = 'price_history';
   static const String keyFirstTimeInit = 'first_time_init';
 
   // ==================== MOCK URLs ====================

@@ -10,8 +10,10 @@ import '../../domain/use_cases/shopping_list/add_product_use_case.dart';
 import '../../domain/use_cases/shopping_list/delete_list_use_case.dart';
 import '../../domain/use_cases/shopping_list/delete_product_use_case.dart';
 import '../../domain/use_cases/shopping_list/get_lists_use_case.dart';
+import '../../domain/use_cases/shopping_list/get_list_by_id_use_case.dart';
 import '../../domain/use_cases/shopping_list/update_list_use_case.dart';
 import '../../domain/use_cases/shopping_list/update_product_use_case.dart';
+import '../../domain/use_cases/shopping_list/complete_list_use_case.dart';
 import 'home_controller.dart';
 import 'lists_controller.dart';
 
@@ -19,21 +21,25 @@ import 'lists_controller.dart';
 /// Gestiona detalles de una lista y operaciones CRUD de productos
 class ListDetailController extends GetxController {
   final GetListsUseCase _getListsUseCase;
+  final GetListByIdUseCase _getListByIdUseCase;
   final UpdateListUseCase _updateListUseCase;
   final DeleteListUseCase _deleteListUseCase;
   final AddProductUseCase _addProductUseCase;
   final UpdateProductUseCase _updateProductUseCase;
   final DeleteProductUseCase _deleteProductUseCase;
+  final CompleteListUseCase _completeListUseCase;
   final GetCategoriesUseCase _getCategoriesUseCase;
   final LocalStorageProvider _storageProvider;
 
   ListDetailController(
     this._getListsUseCase,
+    this._getListByIdUseCase,
     this._updateListUseCase,
     this._deleteListUseCase,
     this._addProductUseCase,
     this._updateProductUseCase,
     this._deleteProductUseCase,
+    this._completeListUseCase,
     this._getCategoriesUseCase,
     this._storageProvider,
   );
@@ -184,11 +190,12 @@ class ListDetailController extends GetxController {
   Future<void> loadList(String listId) async {
     _isLoading.value = true;
     try {
-      final lists = await _getListsUseCase();
-      final list = lists.firstWhere(
-        (l) => l.id == listId,
-        orElse: () => throw Exception('Lista no encontrada'),
-      );
+      // Usar getListById que busca en TODAS las listas (activas y completadas)
+      final list = await _getListByIdUseCase(listId);
+
+      if (list == null) {
+        throw Exception('Lista no encontrada');
+      }
 
       _shoppingList.value = list;
       _editingListName.value = list.name;
@@ -664,6 +671,67 @@ class ListDetailController extends GetxController {
         'Éxito',
         'Lista eliminada',
         snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  /// Completar compra (guardar en historial, lista permanece)
+  Future<void> completeList() async {
+    if (_shoppingList.value == null) return;
+
+    // Validar que tenga productos
+    if (_shoppingList.value!.isEmpty) {
+      Get.snackbar(
+        'Aviso',
+        'No puedes completar una compra sin productos',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Confirmación
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Completar compra'),
+        content: Text(
+          '¿Confirmas que has completado esta compra?\n\n'
+          'Total: ${currencySymbol}${total.toStringAsFixed(2)}\n'
+          'Productos: $totalProducts\n\n'
+          'Se guardará en tu historial y podrás seguir usando esta lista.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('Completar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _completeListUseCase.execute(_shoppingList.value!.id);
+
+      // Refrescar otros controllers
+      _refreshOtherControllers();
+
+      Get.back(); // Volver a la pantalla anterior
+      Get.snackbar(
+        'Éxito',
+        'Compra completada y guardada en el historial',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
       );
     } catch (e) {
       Get.snackbar(

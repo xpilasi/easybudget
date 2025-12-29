@@ -2,9 +2,11 @@ import 'package:get/get.dart';
 import '../../app/config/app_constants.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/shopping_list.dart';
+import '../../domain/entities/completed_purchase.dart';
 import '../../domain/use_cases/category/get_categories_use_case.dart';
 import '../../domain/use_cases/shopping_list/get_lists_use_case.dart';
 import '../../domain/use_cases/shopping_list/create_list_use_case.dart';
+import '../../domain/use_cases/purchase/get_purchase_history_use_case.dart';
 
 /// Controller del Home Screen usando GetX
 /// Gestiona estadísticas y listas recientes
@@ -12,20 +14,24 @@ class HomeController extends GetxController {
   final GetListsUseCase _getListsUseCase;
   final GetCategoriesUseCase _getCategoriesUseCase;
   final CreateListUseCase _createListUseCase;
+  final GetPurchaseHistoryUseCase _getPurchaseHistoryUseCase;
 
   HomeController(
     this._getListsUseCase,
     this._getCategoriesUseCase,
     this._createListUseCase,
+    this._getPurchaseHistoryUseCase,
   );
 
   // ==================== STATE ====================
 
   final RxList<ShoppingList> _lists = <ShoppingList>[].obs;
+  final RxList<CompletedPurchase> _recentPurchases = <CompletedPurchase>[].obs;
   final RxList<Category> _categories = <Category>[].obs;
   final RxBool _isLoading = false.obs;
 
   List<ShoppingList> get lists => _lists;
+  List<CompletedPurchase> get recentPurchases => _recentPurchases;
   List<Category> get categories => _categories;
   bool get isLoading => _isLoading.value;
 
@@ -61,9 +67,14 @@ class HomeController extends GetxController {
     _isLoading.value = true;
     try {
       final listsResult = await _getListsUseCase();
+      final purchasesResult = await _getPurchaseHistoryUseCase();
       final categoriesResult = await _getCategoriesUseCase();
 
       _lists.value = listsResult;
+      // Solo tomar las últimas N compras para el home
+      _recentPurchases.value = purchasesResult
+          .take(AppConstants.maxRecentLists)
+          .toList();
       _categories.value = categoriesResult;
     } catch (e) {
       Get.snackbar(

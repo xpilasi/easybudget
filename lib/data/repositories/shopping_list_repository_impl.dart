@@ -17,20 +17,28 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
 
   // ==================== LISTAS ====================
 
-  @override
-  Future<List<ShoppingList>> getLists() async {
-    // Intentar obtener listas guardadas
+  /// Obtener todas las listas (solo listas activas)
+  Future<List<ShoppingList>> _getAllLists() async {
     final storedLists = _storageProvider.getLists();
 
+    print('🔍 _getAllLists: storedLists = ${storedLists?.length ?? 0} listas');
+
     if (storedLists != null) {
-      // Si existen datos guardados (aunque sea lista vacía), retornarlos
-      return storedLists
+      final lists = storedLists
           .map((json) => ShoppingListModel.fromJson(json))
           .toList();
+
+      print('🔍 _getAllLists: Parseadas ${lists.length} listas');
+      for (var list in lists) {
+        print('   - ${list.name} (${list.id})');
+      }
+
+      return lists;
     }
 
     // Si no hay datos guardados, verificar si es la primera vez
     if (_storageProvider.isFirstTimeInit()) {
+      print('🔍 _getAllLists: Primera vez, cargando datos mock');
       // Solo en la primera vez, cargar y guardar datos mock
       final mockLists = MockDataProvider.getMockLists();
       await _saveLists(mockLists);
@@ -38,15 +46,24 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
       return mockLists;
     }
 
-    // Si no es primera vez y no hay datos, retornar lista vacía
+    print('🔍 _getAllLists: No hay datos, retornando lista vacía');
     return [];
   }
 
   @override
+  Future<List<ShoppingList>> getLists() async {
+    // Obtener todas las listas (ahora solo hay activas en este storage)
+    final lists = await _getAllLists();
+    print('✅ getLists: ${lists.length} listas activas');
+    return lists;
+  }
+
+  @override
   Future<ShoppingList?> getListById(String id) async {
-    final lists = await getLists();
+    // Buscar en las listas activas
+    final allLists = await _getAllLists();
     try {
-      return lists.firstWhere((list) => list.id == id);
+      return allLists.firstWhere((list) => list.id == id);
     } catch (e) {
       return null;
     }
@@ -58,7 +75,7 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
     required String categoryId,
     required String currency,
   }) async {
-    final lists = await getLists();
+    final allLists = await _getAllLists();
 
     // Crear nueva lista
     final newList = ShoppingListModel(
@@ -70,9 +87,9 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
       createdAt: DateTime.now(),
     );
 
-    // Agregar y guardar
+    // Agregar y guardar TODAS las listas
     final updatedLists = [
-      ...lists.map((l) => ShoppingListModel.fromEntity(l)),
+      ...allLists.map((l) => ShoppingListModel.fromEntity(l)),
       newList,
     ];
     await _saveLists(updatedLists);
@@ -82,10 +99,10 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
 
   @override
   Future<ShoppingList> updateList(ShoppingList list) async {
-    final lists = await getLists();
+    final allLists = await _getAllLists();
 
-    // Actualizar lista
-    final updatedLists = lists.map((l) {
+    // Actualizar lista en TODAS
+    final updatedLists = allLists.map((l) {
       return l.id == list.id
           ? ShoppingListModel.fromEntity(list)
           : ShoppingListModel.fromEntity(l);
@@ -97,10 +114,10 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
 
   @override
   Future<void> deleteList(String listId) async {
-    final lists = await getLists();
+    final allLists = await _getAllLists();
 
-    // Eliminar lista
-    final updatedLists = lists
+    // Eliminar lista de TODAS
+    final updatedLists = allLists
         .where((l) => l.id != listId)
         .map((l) => ShoppingListModel.fromEntity(l))
         .toList();
@@ -174,7 +191,9 @@ class ShoppingListRepositoryImpl implements ShoppingListRepository {
   // ==================== HELPERS ====================
 
   Future<void> _saveLists(List<ShoppingListModel> lists) async {
+    print('💾 _saveLists: Guardando ${lists.length} listas');
     final listsJson = lists.map((l) => l.toJson()).toList();
     await _storageProvider.saveLists(listsJson);
+    print('💾 _saveLists: Guardado completo');
   }
 }

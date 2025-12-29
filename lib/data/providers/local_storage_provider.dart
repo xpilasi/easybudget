@@ -67,6 +67,46 @@ class LocalStorageProvider {
     return data?.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  // ==================== COMPLETED PURCHASES (HISTORIAL) ====================
+
+  /// Guardar compras completadas (historial)
+  Future<void> saveCompletedPurchases(List<Map<String, dynamic>> purchases) async {
+    await _storage.write(AppConstants.keyCompletedPurchases, purchases);
+  }
+
+  /// Obtener compras completadas (historial)
+  List<Map<String, dynamic>>? getCompletedPurchases() {
+    final data = _storage.read<List>(AppConstants.keyCompletedPurchases);
+    return data?.map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
+  // ==================== PRICE HISTORY ====================
+
+  /// Guardar historial de precios completo
+  Future<void> savePriceHistory(List<Map<String, dynamic>> history) async {
+    await _storage.write(AppConstants.keyPriceHistory, history);
+  }
+
+  /// Obtener historial de precios
+  List<Map<String, dynamic>>? getPriceHistory() {
+    final data = _storage.read<List>(AppConstants.keyPriceHistory);
+    return data?.map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
+  /// Agregar una entrada al historial de precios
+  Future<void> addPriceHistoryEntry(Map<String, dynamic> entry) async {
+    final history = getPriceHistory() ?? [];
+    history.add(entry);
+    await savePriceHistory(history);
+  }
+
+  /// Agregar múltiples entradas al historial de precios
+  Future<void> addPriceHistoryEntries(List<Map<String, dynamic>> entries) async {
+    final history = getPriceHistory() ?? [];
+    history.addAll(entries);
+    await savePriceHistory(history);
+  }
+
   // ==================== LIST STATE ====================
 
   /// Guardar productos seleccionados de una lista

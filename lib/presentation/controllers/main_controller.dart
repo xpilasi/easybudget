@@ -3,9 +3,11 @@ import '../../app/services/deep_link_service.dart';
 import '../pages/home/home_binding.dart';
 import '../pages/lists/lists_binding.dart';
 import '../pages/profile/profile_binding.dart';
+import '../pages/history/history_binding.dart';
 import '../widgets/modals/import_list_modal.dart';
 import 'home_controller.dart';
 import 'lists_controller.dart';
+import 'history_controller.dart';
 
 /// Controller del Main Screen usando GetX
 /// Gestiona la navegación del Bottom Navigation Bar
@@ -45,6 +47,11 @@ class MainController extends GetxController {
       if (index == 1 && Get.isRegistered<ListsController>()) {
         Get.find<ListsController>().refresh();
       }
+
+      // Refrescar datos cuando se navega a History
+      if (index == 2 && Get.isRegistered<HistoryController>()) {
+        Get.find<HistoryController>().refresh();
+      }
     }
   }
 
@@ -62,6 +69,11 @@ class MainController extends GetxController {
         }
         break;
       case 2:
+        if (!Get.isRegistered<HistoryBinding>()) {
+          HistoryBinding().dependencies();
+        }
+        break;
+      case 3:
         if (!Get.isRegistered<ProfileBinding>()) {
           ProfileBinding().dependencies();
         }

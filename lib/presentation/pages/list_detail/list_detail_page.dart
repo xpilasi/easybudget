@@ -822,6 +822,17 @@ class ListDetailPage extends GetView<ListDetailController> {
                 },
               ),
               ListTile(
+                leading: Icon(Icons.check_circle_outline, color: context.success),
+                title: Text(
+                  'Completar compra',
+                  style: TextStyle(color: context.success),
+                ),
+                onTap: () {
+                  Get.back();
+                  controller.completeList();
+                },
+              ),
+              ListTile(
                 leading: Icon(Icons.delete_outline, color: context.error),
                 title: Text(
                   'Eliminar lista',

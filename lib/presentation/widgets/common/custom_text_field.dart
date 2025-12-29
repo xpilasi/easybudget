@@ -134,10 +134,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
               final error = widget.validator!(value);
               if (error != null) {
                 _enableAutoValidation();
-              }
-              setState(() {
+                // NO llamar setState dentro del validator
                 _errorText = error;
-              });
+              }
               return error;
             }
             return null;

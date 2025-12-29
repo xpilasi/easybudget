@@ -4,10 +4,11 @@ import '../../../app/theme/app_theme.dart';
 import '../../controllers/main_controller.dart';
 import '../home/home_page.dart';
 import '../lists/lists_page.dart';
+import '../history/history_page.dart';
 import '../profile/profile_page.dart';
 
 /// Main Screen - Pantalla principal con Bottom Navigation
-/// Contiene los 3 tabs principales: Home, Lists, Profile
+/// Contiene los 4 tabs principales: Home, Lists, History, Profile
 class MainPage extends GetView<MainController> {
   const MainPage({super.key});
 
@@ -15,13 +16,15 @@ class MainPage extends GetView<MainController> {
   Widget _getCurrentPage(int index) {
     switch (index) {
       case 0:
-        return HomePage();
+        return const HomePage();
       case 1:
-        return ListsPage();
+        return const ListsPage();
       case 2:
-        return ProfilePage();
+        return const HistoryPage();
+      case 3:
+        return const ProfilePage();
       default:
-        return HomePage();
+        return const HomePage();
     }
   }
 
@@ -70,8 +73,21 @@ class MainPage extends GetView<MainController> {
             ),
             NavigationDestination(
               icon: Icon(
-                Icons.person_outline,
+                Icons.history_outlined,
                 color: currentIndex == 2
+                    ? context.primary
+                    : context.textSecondary,
+              ),
+              selectedIcon: Icon(
+                Icons.history,
+                color: context.primary,
+              ),
+              label: 'Historial',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.person_outline,
+                color: currentIndex == 3
                     ? context.primary
                     : context.textSecondary,
               ),

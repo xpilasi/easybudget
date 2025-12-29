@@ -48,6 +48,16 @@ class HomePage extends GetView<HomeController> {
 
                     // Listas recientes
                     _buildRecentLists(context),
+
+                    SizedBox(height: AppSpacing.xl),
+
+                    // Título de compras completadas
+                    _buildSectionTitle(context, 'Últimas Compras'),
+
+                    SizedBox(height: AppSpacing.md),
+
+                    // Compras completadas recientes
+                    _buildRecentCompletedLists(context),
                   ]),
                 ),
               ),
@@ -364,6 +374,163 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
+  /// Compras completadas recientes
+  Widget _buildRecentCompletedLists(BuildContext context) {
+    if (controller.recentPurchases.isEmpty) {
+      return _buildEmptyCompletedState(context);
+    }
+
+    return Column(
+      children: controller.recentPurchases.map((purchase) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: _buildCompletedPurchaseCard(context, purchase),
+        );
+      }).toList(),
+    );
+  }
+
+  /// Tarjeta de compra completada
+  Widget _buildCompletedPurchaseCard(BuildContext context, dynamic purchase) {
+    final category = controller.getCategoryById(purchase.categoryId);
+
+    return Card(
+      elevation: 2,
+      shadowColor: context.shadow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+      ),
+      child: InkWell(
+        onTap: () {
+          // TODO: Navegar a detalle de compra cuando esté implementado
+          Get.snackbar(
+            'En desarrollo',
+            'Detalle de compra próximamente',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        },
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              // Indicador de categoría
+              Container(
+                width: 4,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: category?.color ?? context.success,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              // Icono de completado
+              Container(
+                padding: EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: context.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  color: context.success,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              // Información de la compra
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      purchase.listName,
+                      style: AppTextStyles.bodyLarge(
+                        color: context.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.event,
+                          size: 14,
+                          color: context.textSecondary,
+                        ),
+                        SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Completada ${_formatDate(purchase.completedAt)}',
+                          style: AppTextStyles.bodySmall(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Total
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${purchase.currency}${_formatCurrency(purchase.total)}',
+                    style: AppTextStyles.bodyLarge(
+                      color: context.success,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${purchase.totalProducts} items',
+                    style: AppTextStyles.bodySmall(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Estado vacío para compras completadas
+  Widget _buildEmptyCompletedState(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        children: [
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 60,
+            color: context.textSecondary.withValues(alpha: 0.5),
+          ),
+          SizedBox(height: AppSpacing.md),
+          Text(
+            'No hay compras completadas',
+            style: AppTextStyles.bodyMedium(
+              color: context.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            'Completa una lista para verla aquí',
+            style: AppTextStyles.bodySmall(
+              color: context.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Estado vacío
   Widget _buildEmptyState(BuildContext context) {
     return Container(
@@ -398,7 +565,7 @@ class HomePage extends GetView<HomeController> {
 
   /// Formatear moneda
   String _formatCurrency(double amount) {
-    final formatter = NumberFormat('#,##0.00', 'es_ES');
+    final formatter = NumberFormat('#,##0.00');
     return formatter.format(amount);
   }
 
