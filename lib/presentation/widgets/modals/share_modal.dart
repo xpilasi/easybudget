@@ -253,51 +253,43 @@ class ShareModal extends StatelessWidget {
   /// Compartir por WhatsApp con deep link
   Future<void> _shareViaWhatsApp() async {
     try {
+      print('📱 ShareModal: Iniciando compartir por WhatsApp');
       final deepLinkService = Get.find<DeepLinkService>();
-      final whatsappUrl = deepLinkService.generateWhatsAppUrl(
+      print('📱 ShareModal: DeepLinkService encontrado');
+
+      final whatsappUrl = await deepLinkService.generateWhatsAppUrl(
         shoppingList,
         categoryName,
       );
 
-      // Validar longitud de URL (límite seguro: 2000 caracteres)
-      if (whatsappUrl.length > 2000) {
-        Get.dialog(
-          AlertDialog(
-            title: Text(
-              'Lista muy grande',
-              style: AppTextStyles.h4(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-              'Esta lista tiene demasiados productos para compartir por WhatsApp.\n\nUsa "Compartir como Texto" en su lugar.',
-              style: AppTextStyles.bodyMedium(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(),
-                child: const Text('Entendido'),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
+      print('📱 ShareModal: URL generada: $whatsappUrl');
 
       final uri = Uri.parse(whatsappUrl);
+      print('📱 ShareModal: URI parseada: $uri');
 
-      // Agregar timeout a canLaunchUrl para evitar congelamientos
-      final canLaunch = await canLaunchUrl(uri).timeout(
-        const Duration(seconds: 3),
-        onTimeout: () => false,
-      );
+      // Intentar abrir WhatsApp directamente
+      print('📱 ShareModal: Intentando abrir WhatsApp...');
 
-      if (canLaunch) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+
+        if (launched) {
+          print('✅ ShareModal: WhatsApp abierto correctamente');
+        } else {
+          print('❌ ShareModal: launchUrl retornó false');
+          Get.snackbar(
+            'Error',
+            'No se pudo abrir WhatsApp. Verifica que esté instalado.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.error.withValues(alpha: 0.1),
+            colorText: AppColors.error,
+          );
+        }
+      } catch (launchError) {
+        print('❌ ShareModal: Error al lanzar WhatsApp: $launchError');
         Get.snackbar(
           'Error',
           'No se pudo abrir WhatsApp. Verifica que esté instalado.',
@@ -307,9 +299,10 @@ class ShareModal extends StatelessWidget {
         );
       }
     } catch (e) {
+      print('❌ ShareModal: Error en _shareViaWhatsApp: $e');
       Get.snackbar(
         'Error',
-        'No se pudo compartir por WhatsApp. Usa "Compartir como Texto".',
+        'No se pudo compartir por WhatsApp. Intenta de nuevo o usa "Compartir como Texto".',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withValues(alpha: 0.1),
         colorText: AppColors.error,

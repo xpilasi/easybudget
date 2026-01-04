@@ -83,16 +83,21 @@ class MainController extends GetxController {
 
   /// Configurar listener para deep links entrantes
   void _setupDeepLinkListener() {
+    print('🔗 MainController: Configurando listener de deep links...');
     final deepLinkService = Get.find<DeepLinkService>();
 
     deepLinkService.setOnListReceivedCallback((sharedListData) {
+      print('🔗 MainController: Callback ejecutado! Lista recibida: ${sharedListData.name}');
+
       // Cambiar a tab de listas si no estamos ahí
       if (_currentIndex.value != 1) {
+        print('🔗 MainController: Cambiando a tab de listas...');
         changeTab(1);
       }
 
       // Esperar a que el tab esté listo
       Future.delayed(const Duration(milliseconds: 300), () {
+        print('🔗 MainController: Mostrando modal de importación...');
         // Obtener el ListsController
         final listsController = Get.find<ListsController>();
 
@@ -105,6 +110,7 @@ class MainController extends GetxController {
             required String categoryId,
             required SharedListData sharedData,
           }) {
+            print('🔗 MainController: Importando lista...');
             listsController.importSharedList(
               name: name,
               categoryId: categoryId,
@@ -114,5 +120,7 @@ class MainController extends GetxController {
         );
       });
     });
+
+    print('✅ MainController: Listener de deep links configurado correctamente');
   }
 }

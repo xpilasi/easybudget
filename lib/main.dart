@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'app/theme/app_theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/config/app_constants.dart';
@@ -13,6 +15,12 @@ void main() async {
 
   // Inicializar GetStorage
   await GetStorage.init();
+
+  // Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print('🔥 Firebase inicializado');
 
   // Inicializar bindings globales ANTES de runApp
   InitialBinding().dependencies();

@@ -120,21 +120,17 @@ class HistoryPage extends GetView<HistoryController> {
             ),
             SizedBox(width: AppSpacing.md),
             // Total gastado
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.attach_money,
-                iconColor: context.success,
-                title: _formatCurrency(controller.totalSpent),
-                subtitle: 'Total',
-                backgroundColor: context.success.withValues(alpha: 0.1),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: AppSpacing.md),
-        // Gasto promedio (card completo)
-        _buildStatCard(
+            // Expanded(
+            //   child: _buildStatCard(
+            //     context,
+            //     icon: Icons.attach_money,
+            //     iconColor: context.success,
+            //     title: _formatCurrency(controller.totalSpent),
+            //     subtitle: 'Total',
+            //     backgroundColor: context.success.withValues(alpha: 0.1),
+            //   ),
+            // ),
+            _buildStatCard(
           context,
           icon: Icons.trending_up,
           iconColor: context.info,
@@ -142,6 +138,10 @@ class HistoryPage extends GetView<HistoryController> {
           subtitle: 'Promedio por compra',
           backgroundColor: context.info.withValues(alpha: 0.1),
         ),
+          ],
+        ),
+        
+        
       ],
     );
   }

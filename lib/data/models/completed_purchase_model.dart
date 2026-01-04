@@ -57,17 +57,28 @@ class CompletedPurchaseModel extends CompletedPurchase {
     required ShoppingList list,
     required DateTime completedAt,
   }) {
+    // Filtrar solo productos con cantidad > 0 (productos efectivamente comprados)
+    final purchasedProducts = list.products
+        .where((p) => p.quantity > 0)
+        .map((p) => ProductModel.fromEntity(p))
+        .toList();
+
+    // Recalcular total basado en productos comprados
+    final purchaseTotal = purchasedProducts.fold<double>(
+      0.0,
+      (sum, product) => sum + product.subtotal,
+    );
+
     return CompletedPurchaseModel(
       id: purchaseId,
       listId: list.id,
       listName: list.name,
       categoryId: list.categoryId,
       currency: list.currency,
-      products:
-          list.products.map((p) => ProductModel.fromEntity(p)).toList(),
+      products: purchasedProducts,
       createdAt: list.createdAt,
       completedAt: completedAt,
-      total: list.total,
+      total: purchaseTotal,
     );
   }
 

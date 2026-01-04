@@ -172,9 +172,12 @@ class ListsController extends GetxController {
         currency: sharedData.currency,
       );
 
-      // 2. Agregar todos los productos
+      // 2. Filtrar productos con cantidad > 0 (evitar productos vacíos)
+      final validProducts = sharedData.products.where((p) => p.quantity > 0).toList();
+
+      // 3. Agregar todos los productos válidos
       var updatedList = newList;
-      for (final product in sharedData.products) {
+      for (final product in validProducts) {
         updatedList = await _addProductUseCase(
           listId: updatedList.id,
           productName: product.name,
@@ -193,8 +196,8 @@ class ListsController extends GetxController {
         duration: const Duration(seconds: 3),
       );
 
-      // 4. Navegar al detalle de la lista
-      navigateToListDetail(updatedList.id);
+      // La lista ya se muestra en el tab de listas actual
+      // No navegamos automáticamente para evitar problemas de contexto
     } catch (e) {
       Get.snackbar(
         'Error',

@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "615041315044",
+    "firebase_url": "https://easybudget-b4109-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "easybudget-b4109",
+    "storage_bucket": "easybudget-b4109.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615041315044:android:4f2fe7cee810273e95bcf1",
+        "android_client_info": {
+          "package_name": "com.example.easy_budget"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCt1nmmepm3KKWNnTTbSKy9s0sk4gBk5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615041315044:android:a49872bb84b7093c95bcf1",
+        "android_client_info": {
+          "package_name": "com.xpilasi.easy_budget"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCt1nmmepm3KKWNnTTbSKy9s0sk4gBk5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
